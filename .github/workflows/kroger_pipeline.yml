@@ -35,6 +35,9 @@ jobs:
           echo "KROGER_CLIENT_SECRET=${KROGER_CLIENT_SECRET}" >> $GITHUB_ENV
           echo "PRODUCT_COMPACT_ACCESS_TOKEN=${PRODUCT_COMPACT_ACCESS_TOKEN}" >> $GITHUB_ENV
           echo "PRODUCT_COMPACT_ACCESS_TOKEN_EXPIRATION=${PRODUCT_COMPACT_ACCESS_TOKEN_EXPIRATION}" >> $GITHUB_ENV
+          
+      - name: 🔎 Debug Environment Variables
+        run: env | grep 'KROGER'
 
       - name: 🔄 Run Data Pipeline
         working-directory: kroger-data-pipeline/src
