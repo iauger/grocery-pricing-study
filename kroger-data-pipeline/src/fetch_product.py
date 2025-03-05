@@ -96,11 +96,12 @@ def fetch_products_in_batches(batch_size=10):
     total_locations = len(locations_to_process)
     print(f"{total_locations} require updates, this run will process {batch_size} when complete.")
     processed_count = 0
+    processed_locations = []
 
     for i, location_id in enumerate(locations_to_process, start=1):
         try:
             fetch_and_filter_products(location_id)  # Calls the API and saves data
-            update_tracker(location_id)  # Update tracker after success
+            processed_locations.append(location_id)
             processed_count += 1
 
             # Mental sanity feature so I don't constantly wonder how many records have been processed    
@@ -119,6 +120,8 @@ def fetch_products_in_batches(batch_size=10):
             print(f"\n❌ Error processing {location_id}: {str(e)}")
 
     print(f"\n✅ Completed {processed_count} API calls in this run.")
+    
+    return processed_locations
 
 if __name__ == "__main__":
     fetch_products_in_batches(batch_size=10)

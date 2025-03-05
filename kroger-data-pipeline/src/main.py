@@ -4,6 +4,7 @@ from tracking import load_location_tracker, update_log
 from fetch_product import fetch_products_in_batches
 from kroger_api import get_kroger_product_compact_token
 from data_processing import filter_products, save_to_csv
+from tracking import update_tracker
 
 # ✅ Set up directory paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get `src/` directory
@@ -31,9 +32,14 @@ def main(batch_size=10):
 
     # ✅ Step 3: Fetch & Process Product Data
     print("📦 Fetching product data...")
-    fetch_products_in_batches(batch_size=batch_size)
+    updated_locations = fetch_products_in_batches(batch_size=batch_size)
 
-    # ✅ Step 4: Load & Filter Data
+    # ✅ Step 4: Apply Updates After Fetching
+    print("📝 Updating tracker after batch fetch...")
+    for location_id in updated_locations:
+        update_tracker(location_id)  # ✅ Ensure updates are applied after processing
+
+    # ✅ Step 5: Load & Filter Data
     print("🛠️ Processing and filtering product data...")
     if os.path.exists(PRODUCTS_FILE):
         df = pd.read_csv(PRODUCTS_FILE)
@@ -42,9 +48,6 @@ def main(batch_size=10):
         print(f"✅ Processed and saved filtered product data to {PRODUCTS_FILE}")
     else:
         print("⚠️ No product data file found! Skipping filtering step.")
-
-    # ✅ Step 5: Final Log Update
-    update_log()
     
     print("\n🎉 **Pipeline Execution Complete!** 🎉")
 
