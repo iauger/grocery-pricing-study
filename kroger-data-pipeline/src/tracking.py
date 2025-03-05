@@ -66,11 +66,15 @@ def update_tracker(location_id):
     """Updates the tracker after a successful API call."""
     tracker_df = pd.read_csv(PRODUCT_API_LOG, dtype={"Location ID": str})
 
-    # Update Last Retrieved Date and increment Successful Calls
-    tracker_df.loc[tracker_df["Location ID"] == location_id, "Last Retrieved Date"] = datetime.today().strftime("%Y-%m-%d")
+    today_str = datetime.today().strftime("%Y-%m-%d")
+    
+    # ✅ Ensure we're updating the correct row
+    tracker_df.loc[tracker_df["Location ID"] == location_id, "Last Retrieved Date"] = today_str
     tracker_df.loc[tracker_df["Location ID"] == location_id, "Successful Calls"] += 1
 
-    tracker_df.to_csv(PRODUCT_API_LOG, index=False)
+    print(f"📝 Updating tracker: {location_id} - {today_str}")
+
+    tracker_df.to_csv(PRODUCT_API_LOG, index=False)  # ✅ Ensure changes are saved
 
 def update_log():
     """Updates 'Needs Data' column based on the last retrieval date and removes duplicates."""
