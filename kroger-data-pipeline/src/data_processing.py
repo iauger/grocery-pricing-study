@@ -2,17 +2,19 @@ import pandas as pd
 from datetime import datetime, timedelta
 import os
 
-# Ensure paths are relative to `src/`
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get the `src/` directory
-DATA_DIR = os.path.join(BASE_DIR, "data")
+# ✅ Set base directory dynamically
+BASE_DIR = os.getenv("GITHUB_WORKSPACE", os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, "kroger-data-pipeline", "src", "data")
 
-# ✅ Define file paths using DATA_DIR
+# ✅ Update file paths
 PRODUCTS_FILE = os.path.join(DATA_DIR, "kroger_product_data.csv")
 LOCATION_FILE = os.path.join(DATA_DIR, "kroger_locations.csv")
 PRODUCT_API_LOG = os.path.join(DATA_DIR, "product_api_log.csv")
 
-# ✅ Ensure the `data/` directory exists
-os.makedirs(DATA_DIR, exist_ok=True)
+# Ensure data folder exists in GitHub Actions runner
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    print(f"✅ Created missing data directory: {DATA_DIR}")
 
 # ✅ Ensure the product data CSV exists (Creates empty file if missing)
 if not os.path.exists(PRODUCTS_FILE):

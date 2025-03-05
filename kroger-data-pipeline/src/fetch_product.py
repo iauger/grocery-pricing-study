@@ -7,14 +7,19 @@ from kroger_api import search_kroger_products
 from data_processing import filter_products, save_to_csv
 from tracking import update_tracker, update_log
 
-# ✅ Set up directory paths
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get the `src/` directory
-DATA_DIR = os.path.join(BASE_DIR, "data")
+# ✅ Set base directory dynamically
+BASE_DIR = os.getenv("GITHUB_WORKSPACE", os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, "kroger-data-pipeline", "src", "data")
 
-# ✅ Define file paths
+# ✅ Update file paths
 PRODUCTS_FILE = os.path.join(DATA_DIR, "kroger_product_data.csv")
 LOCATION_FILE = os.path.join(DATA_DIR, "kroger_locations.csv")
 PRODUCT_API_LOG = os.path.join(DATA_DIR, "product_api_log.csv")
+
+# Ensure data folder exists in GitHub Actions runner
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    print(f"✅ Created missing data directory: {DATA_DIR}")
 
 def fetch_and_filter_products(location_id):
     """Fetch products from Kroger API, filter relevant ones, and save to CSV."""
