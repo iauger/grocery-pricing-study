@@ -11,7 +11,7 @@ DATA_DIR = os.path.join(BASE_DIR, "kroger-data-pipeline", "src", "data")
 # ✅ Update file paths
 PRODUCTS_FILE = os.path.join(DATA_DIR, "kroger_product_data.csv")
 LOCATION_FILE = os.path.join(DATA_DIR, "kroger_locations.csv")
-PRODUCT_API_LOG = os.path.join(DATA_DIR, "PRODUCT_API_LOG.csv")
+PRODUCT_API_LOG = os.path.join(DATA_DIR, "product_api_log.csv")
 
 # Ensure data folder exists in GitHub Actions runner
 if not os.path.exists(DATA_DIR):
