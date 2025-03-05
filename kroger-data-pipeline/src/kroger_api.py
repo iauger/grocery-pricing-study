@@ -30,51 +30,39 @@ TOKEN = None
 TOKEN_EXPIRATION = None
 
 
+# Function to get a new token if expired
 def get_kroger_product_compact_token():
-    """Retrieve or refresh the Kroger Product Compact API access token."""
-    global TOKEN, TOKEN_EXPIRATION
+    global access_token, expiration
 
-    # ✅ Check cached token first
-    if TOKEN and TOKEN_EXPIRATION and datetime.now() < TOKEN_EXPIRATION:
-        return TOKEN
+    # If token is missing or expired, request a new one
+    if not access_token or datetime.utcnow() >= datetime.fromisoformat(expiration):
+        print("🔄 Token expired or missing, requesting a new one...")
 
-    # ✅ Retrieve stored token & expiration
-    token = os.getenv("PRODUCT_COMPACT_ACCESS_TOKEN")
-    expiration = os.getenv("PRODUCT_COMPACT_ACCESS_TOKEN_EXPIRATION")
+        # Encode credentials for Basic Auth
+        encoded_auth = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
+        headers = {
+            "Authorization": f"Basic {encoded_auth}",
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+        data = "grant_type=client_credentials&scope=product.compact"
 
-    # ✅ Check if stored token is still valid
-    if token and expiration and datetime.now() < datetime.fromisoformat(expiration):
-        TOKEN = token
-        TOKEN_EXPIRATION = datetime.fromisoformat(expiration)
-        return TOKEN
+        # Request a new token
+        response = requests.post(TOKEN_URL, headers=headers, data=data)
+        if response.status_code == 200:
+            response_data = response.json()
+            access_token = response_data.get("access_token")
+            expires_in = response_data.get("expires_in", 1800)  # Default: 1800 seconds (30 min)
+            expiration_time = datetime.now() + timedelta(seconds=expires_in)
 
-    print("🔄 Token expired or missing, requesting a new one...")
+            # ✅ Store updated tokens in GitHub Actions
+            print("✅ New Token Retrieved! Updating GitHub Secrets...")
+            os.system(f'echo "PRODUCT_COMPACT_ACCESS_TOKEN={access_token}" >> $GITHUB_ENV')
+            os.system(f'echo "PRODUCT_COMPACT_ACCESS_TOKEN_EXPIRATION={expiration_time.isoformat()}" >> $GITHUB_ENV')
 
-    # ✅ Request a new token
-    headers = {
-        "Authorization": f"Basic {ENCODED_AUTH}",
-        "Content-Type": "application/x-www-form-urlencoded",
-    }
-    data = "grant_type=client_credentials&scope=product.compact"
+        else:
+            print(f"❌ Failed to retrieve token: {response.json()}")
 
-    response = requests.post(TOKEN_URL, headers=headers, data=data)
-
-    if response.status_code == 200:
-        response_data = response.json()
-        TOKEN = response_data.get("access_token")
-        expires_in = response_data.get("expires_in", 1800)
-        TOKEN_EXPIRATION = datetime.now() + timedelta(seconds=expires_in)
-
-        # ✅ Store new token in .env
-        set_key(ENV_FILE, "PRODUCT_COMPACT_ACCESS_TOKEN", TOKEN)
-        set_key(ENV_FILE, "PRODUCT_COMPACT_ACCESS_TOKEN_EXPIRATION", TOKEN_EXPIRATION.isoformat())
-
-        print("✅ New Token Retrieved!")
-        return TOKEN
-    else:
-        print("❌ Failed to retrieve token:", response.json())
-        return None
-
+    return access_token
 
 def search_kroger_products(location_id, search_terms=["Eggs", "Bread"], limit=50):
     """Search for products at a Kroger location with pagination."""
