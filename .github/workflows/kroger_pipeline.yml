@@ -48,5 +48,5 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
           git add kroger-data-pipeline/src/data/kroger_product_data.csv kroger-data-pipeline/src/data/product_api_log.csv
-          git commit -m "🚀 Automated data update from GitHub Actions" || true
-          git push origin main || true
+          git commit -m "🚀 Automated data update from GitHub Actions" --allow-empty
+          git push origin main || echo "No changes to push"
