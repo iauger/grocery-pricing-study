@@ -52,4 +52,4 @@ def main(batch_size=10):
     print("\n🎉 **Pipeline Execution Complete!** 🎉")
 
 if __name__ == "__main__":
-    main(batch_size=2)  # Adjust batch size as needed
+    main(batch_size=1000)  # Adjust batch size as needed
